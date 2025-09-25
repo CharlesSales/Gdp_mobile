@@ -1,0 +1,43 @@
+# Node modules (EAS instala do zero)
+node_modules/
+
+# Logs e caches
+*.log
+*.lock
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+.expo/
+.expo-shared/
+.cache/
+.tmp/
+
+# Pastas de build locais
+android/
+ios/
+dist/
+build/
+
+# Configurações locais do editor / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos temporários do TypeScript
+*.tsbuildinfo
+
+# Ambientes e chaves locais (NUNCA subir para EAS)
+.env
+*.keystore
+*.p12
+*.jks
+
+# OneDrive temporários
+.oneDrive*
+~$*
+
+# Imagens ou assets de teste que não entram no app
+tests/
+docs/
