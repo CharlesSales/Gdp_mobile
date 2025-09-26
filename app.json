@@ -3,8 +3,7 @@
     "name": "Acarajé da Mari",
     "slug": "acaraje-da-mari",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/LogoApp.png",
+    "orientation": "portrait"
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,7 +16,6 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/LogoApp.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
