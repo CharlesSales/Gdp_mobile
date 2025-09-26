@@ -3,7 +3,7 @@
     "name": "Acarajé da Mari",
     "slug": "acaraje-da-mari",
     "version": "1.0.0",
-    "orientation": "portrait"
+    "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
