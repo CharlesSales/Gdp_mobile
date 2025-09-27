@@ -8,6 +8,7 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 
 import Produtos from "./src/pages/produtos";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Carrinho from "./src/pages/carrinho";
 import Confirmacao from './src/pages/confirmacao';
 import View from './src/pages/view';
@@ -16,6 +17,8 @@ import PedidosAcarajeScreen from "./src/pages/PedidosAcarajeScreen";
 import PedidosGeral from './src/pages/Pedidos_geral';
 import PedidosRestaurante from './src/pages/PedidosRestaurante';
 import { CarrinhoProvider } from "./src/context/CarrinhoContext";
+import ListaProdutos from "./src/pages/ListaProdutos";
+import CarrinhoDetalhe from "./src/pages/CarrinhoDetalhe";
 
 const Stack = createNativeStackNavigator();
 const SOCKET_URL = "http://SEU_BACKEND_URL"; // Substitua pelo backend
@@ -50,20 +53,22 @@ export default function App() {
   }, []);
 
   return (
-    <CarrinhoProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="Produtos" component={Produtos} />
-          <Stack.Screen name="Carrinho" component={Carrinho} />
-          <Stack.Screen name="Confirmacao" component={Confirmacao} />
-          <Stack.Screen name="PedidosAcaraje" component={PedidosAcarajeScreen} />
-          <Stack.Screen name="PedidosGeral" component={PedidosGeral} />
-          <Stack.Screen name="PedidosRestaurante" component={PedidosRestaurante} />
-          <Stack.Screen name="View" component={View} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </CarrinhoProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <CarrinhoProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Home">
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Produtos" component={ListaProdutos} />
+            <Stack.Screen name="Carrinho" component={CarrinhoDetalhe} />
+            <Stack.Screen name="Confirmacao" component={Confirmacao} />
+            <Stack.Screen name="PedidosAcaraje" component={PedidosAcarajeScreen} />
+            <Stack.Screen name="PedidosGeral" component={PedidosGeral} />
+            <Stack.Screen name="PedidosRestaurante" component={PedidosRestaurante} />
+            <Stack.Screen name="View" component={View} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </CarrinhoProvider>
+    </GestureHandlerRootView>
   );
 }
 
