@@ -15,6 +15,7 @@ export default function Confirmacao() {
   const [enviado, setEnviado] = useState(false);
 
   const API_URL =  'https://gerenciadordepedidos.onrender.com';
+  //const API_URL =  'http://localhost:8080';
 
   // Prepara itens do carrinho para backend
   if (!produtos || produtos.length === 0) {
@@ -79,8 +80,8 @@ export default function Confirmacao() {
         body: JSON.stringify(pedido)
       });
 
-      setEnviado(true);
       handleClear(); // limpa o carrinho
+      setEnviado(true);
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Não foi possível enviar o pedido');
