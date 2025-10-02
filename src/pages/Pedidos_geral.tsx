@@ -12,6 +12,7 @@ export default function PedidosAcarajeScreen() {
   });
 
   const API_URL = "https://gerenciadordepedidos.onrender.com";
+  //const API_URL = "http://localhost:8080";
 
   useEffect(() => {
     const socket = io(API_URL);

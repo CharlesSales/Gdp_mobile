@@ -27,6 +27,7 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
   const [carrinho, setCarrinho] = useState<{ [key: number]: number }>({});
 
   const API_URL =  "https://gerenciadordepedidos.onrender.com";
+  //const API_URL =  "http://localhost:8080";
 
   // Busca produtos
   useEffect(() => {

@@ -15,6 +15,7 @@ export default function ConfirmarPedido() {
   const [enviado, setEnviado] = useState(false);
 
   const API_URL =  'https://gerenciadordepedidos.onrender.com';
+  //const API_URL =  'http://localhost:8080';
 
   // Prepara itens do carrinho para backend
   if (!produtos || produtos.length === 0) {

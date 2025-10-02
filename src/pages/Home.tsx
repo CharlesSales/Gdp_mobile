@@ -18,6 +18,7 @@ export default function Home() {
           >
             <Text style={styles.primaryText}>FAZER PEDIDO</Text>
           </TouchableOpacity>
+          
           <TouchableOpacity
             style={styles.primary}
             onPress={() => navigation.navigate('View')}
@@ -40,19 +41,17 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 10 },
   subtitle: { fontSize: 18, marginBottom: 30 },
   ctas: { 
-    // flexDirection padrão é 'column', mas podemos deixar explícito
     flexDirection: 'column',
-    gap: 16, // espaçamento entre os botões
-    width: '60%', // opcional, deixa os botões com mesma largura
+    gap: 16,
+    width: '60%',
   },
   primary: {
     backgroundColor: '#2d6a4f',
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 8,
-    // remove marginHorizontal
-    marginVertical: 8, // espaçamento vertical entre os botões
-    alignItems: 'center', // centraliza o texto
+    marginVertical: 8,
+    alignItems: 'center',
   },
   primaryText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   footer: { alignItems: 'center', padding: 16, borderTopWidth: 1, borderColor: '#eee' },
