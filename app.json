@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Sales Manager",
-    "slug": "sales-manager",
+    "slug": "acaraje-da-mari",
     "version": "1.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -18,15 +18,16 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/novaLogo.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.hensalles.acarajedamari"
+   "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/novaLogo.png",
+      "backgroundColor": "#ffffff"
     },
+    "edgeToEdgeEnabled": true,
+    "predictiveBackGestureEnabled": false,
+    "package": "com.hensalles.acarajedamari",
+    "versionCode": 2
+  },
     "web": {
       "favicon": "./assets/favicon.png"
     },
