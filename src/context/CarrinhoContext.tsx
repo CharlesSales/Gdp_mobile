@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Alert } from "react-native";
-
+import { useAuth } from './AuthContext'
 interface Produto {
   id_produto: number;
   nome: string;
@@ -25,26 +25,59 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [acaraje, setAcaraje] = useState<Produto[]>([]);
   const [carrinho, setCarrinho] = useState<{ [key: number]: number }>({});
+  const { user, token, isAuthenticated } = useAuth();
 
   const API_URL =  "https://gerenciadordepedidos.onrender.com";
   //const API_URL =  "http://localhost:8080";
 
+  
+
   // Busca produtos
   useEffect(() => {
-  fetch(`${API_URL}/produtos`)
-    .then(res => res.json())
-    .then(data => {
-      const produtosNormalizados = (Array.isArray(data) ? data : data.produtos || []).map((p: any) => ({
-        ...p,
-        id_produto: p.id_produto ?? p.id, // garante que sempre existe id_produto
-        preco: Number(p.preco)            // garante número
-      }));
-      setProdutos(produtosNormalizados);
-    })
-    .catch(err => Alert.alert("Erro ao buscar produtos", err.message));
-}, []);
+    async function fetchProdutos() {
+      if (!token || !isAuthenticated) {
+        console.log("⏳ Aguardando autenticação...");
+        return;
+      }
 
-    
+      console.log('🔐 Token encontrado, carregando produtos do restaurante...');
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/produtos`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        console.log('📦 Produtos retornados:', data);
+
+        const produtosNormalizados = (Array.isArray(data)
+          ? data
+          : data.produtos || []
+        ).map((p: any) => ({
+          ...p,
+          id_produto: p.id_produto ?? p.id,
+          preco: Number(p.preco),
+        }));
+
+        setProdutos(produtosNormalizados);
+      } catch (err: any) {
+        Alert.alert("Erro ao buscar produtos", err.message);
+        console.error("❌ Erro ao carregar produtos:", err);
+      }
+    }
+
+    fetchProdutos();
+  }, [token, isAuthenticated]);
 
 
   const handleAdd = (produto?: Produto) => {

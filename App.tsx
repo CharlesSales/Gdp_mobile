@@ -7,16 +7,20 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 
+import Login from "./src/pages/Login"
+import Funcionario from './src/pages/Funcionario'
 import Produtos from "./src/pages/produtos";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Carrinho from "./src/pages/carrinho";
 import Confirmacao from './src/pages/confirmacao';
 import View from './src/pages/view';
 import Home from './src/pages/Home';
+import Admin from './src/pages/Admin'
 import PedidosAcarajeScreen from "./src/pages/PedidosAcarajeScreen";
 import PedidosGeral from './src/pages/Pedidos_geral';
 import PedidosRestaurante from './src/pages/PedidosRestaurante';
 import { CarrinhoProvider } from "./src/context/CarrinhoContext";
+import { AuthProvider } from "./src/context/AuthContext";
 import ListaProdutos from "./src/pages/ListaProdutos";
 import CarrinhoDetalhe from "./src/pages/CarrinhoDetalhe";
 
@@ -120,48 +124,59 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <CarrinhoProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen 
-              name="Home" 
-              component={Home}
-              options={{ title: "Acarajé da Mari" }}
-            />
-            <Stack.Screen 
-              name="Produtos" 
-              component={ListaProdutos}
-              options={{ title: "Produtos" }}
-            />
-            <Stack.Screen 
-              name="Carrinho" 
-              component={CarrinhoDetalhe}
-              options={{ title: "Carrinho" }}
-            />
-            <Stack.Screen 
-              name="Confirmacao" 
-              component={Confirmacao}
-              options={{ title: "Confirmação" }}
-            />
-            <Stack.Screen 
-              name="PedidosAcaraje" 
-              component={PedidosAcarajeScreen}
-              options={{ title: "Pedidos Acarajé" }}
-            />
-            <Stack.Screen 
-              name="PedidosGeral" 
-              component={PedidosGeral}
-              options={{ title: "Todos os Pedidos" }}
-            />
-            <Stack.Screen 
-              name="PedidosRestaurante" 
-              component={PedidosRestaurante}
-              options={{ title: "Pedidos Restaurante" }}
-            />
-            <Stack.Screen name="View" component={View} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </CarrinhoProvider>
+      <AuthProvider>
+        <CarrinhoProvider>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Login">
+              <Stack.Screen 
+                name="Login" 
+                component={Login}
+                options={{ title: "Login" }}
+              />
+              <Stack.Screen 
+                name="Home" 
+                component={Home}
+                options={{ title: "Sales Manager" }}
+              />
+               <Stack.Screen name="Admin" 
+               component={Admin} />
+              <Stack.Screen 
+                name="Produtos" 
+                component={ListaProdutos}
+              />
+              <Stack.Screen 
+                name="Carrinho" 
+                component={CarrinhoDetalhe}
+                options={{ title: "Carrinho" }}
+              />
+              <Stack.Screen 
+                name="Funcionario" 
+                component={Funcionario}
+              />
+              <Stack.Screen 
+                name="Confirmacao" 
+                component={Confirmacao}
+                options={{ title: "Confirmação" }}
+              />
+              <Stack.Screen 
+                name="PedidosAcaraje" 
+                component={PedidosAcarajeScreen}
+                options={{ title: "Pedidos Acarajé" }}
+              />
+              <Stack.Screen 
+                name="PedidosGeral" 
+                component={PedidosGeral}
+              />
+              <Stack.Screen 
+                name="PedidosRestaurante" 
+                component={PedidosRestaurante}
+                options={{ title: "Pedidos Restaurante" }}
+              />
+              <Stack.Screen name="View" component={View} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </CarrinhoProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }

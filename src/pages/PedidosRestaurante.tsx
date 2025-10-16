@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, TextInput } from 'react-native';
 import { io } from 'socket.io-client';
+import { useAuth } from '../context/AuthContext'
 
-export default function PedidosRestauranteScreen() {
+export default function PedidosAcarajeScreen() {
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -13,20 +16,39 @@ export default function PedidosRestauranteScreen() {
 
   const API_URL = "https://gerenciadordepedidos.onrender.com";
   //const API_URL = "http://localhost:8080";
- 
+
   useEffect(() => {
+     if (!token || !isAuthenticated) {
+      console.log("⏳ Aguardando autenticação antes de carregar pedidos...");
+      return;
+    }
     const socket = io(API_URL);
 
-    socket.on("novoPedido", (pedido) => {
+    socket.on("novoPedido_geral", (pedido) => {
       setPedidos(prev => {
         const jaExiste = prev.some(p => p.id_pedido === pedido.id_pedido);
         return jaExiste ? prev : [pedido, ...prev];
       });
     });
 
+    socket.on("statusAtualizado", ({ id, novoStatus }) => {
+      setPedidos(prev =>
+        prev.map(p => 
+          p.id_pedido === Number(id) ? { ...p, pag: novoStatus } : p
+        )
+      );
+    });
+    
+
     const fetchPedidos = async () => {
       try {
-        const res = await fetch(`${API_URL}/pedidosRestaurante`);
+        const res = await fetch(`${API_URL}/pedidosRestaurante`, {
+         headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
         const data = await res.json();
         setPedidos(Array.isArray(data) ? data : []);
@@ -36,14 +58,12 @@ export default function PedidosRestauranteScreen() {
         setLoading(false);
       }
     };
-    fetchPedidos();
+      fetchPedidos();
+    return () => socket.disconnect();
+  }, [token, isAuthenticated]); // 🔥 agora depende do token
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
-  async function handleChangeStatus(id: number) {
+ async function handleChangeStatus(id: number) {
     try {
       const response = await fetch(`${API_URL}/pedidosGeral/${id}`, {
         method: 'PUT',
@@ -79,18 +99,26 @@ export default function PedidosRestauranteScreen() {
   };
 
   const pedidosFiltrados = pedidos.filter(pedido => {
-    if (!filtroData) return true;
-    if (!pedido.data_hora) return false;
-    const pedidoData = new Date(pedido.data_hora).toISOString().slice(0, 10);
-    return pedidoData === filtroData;
-  });
+  if (!filtroData) return true;
+  if (!pedido.data_hora) return false;
+
+  const dataPedido = new Date(pedido.data_hora);
+  const ano = dataPedido.getFullYear();
+  const mes = String(dataPedido.getMonth() + 1).padStart(2, "0");
+  const dia = String(dataPedido.getDate()).padStart(2, "0");
+
+  const dataFormatada = `${ano}-${mes}-${dia}`; // YYYY-MM-DD local
+  return dataFormatada === filtroData;
+});
+
+
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />;
   if (erro) return <Text style={{ color: "red", padding: 16 }}>{erro}</Text>;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Pedidos do Restaurante</Text>
+      <Text style={styles.title}>Lista de Pedidos</Text>
       <View style={{ marginBottom: 20 }}>
         <Text>Filtrar por dia:</Text>
         <TextInput
@@ -115,9 +143,10 @@ export default function PedidosRestauranteScreen() {
             >
               <Text>id: {item.id_pedido}</Text>
               <Text>Cliente: {item.nome_cliente}</Text>
+              <Text>Casa: {item.casa}</Text>
               <Text>Total: R$ {item.total}</Text>
               <Text>Data: {formatarData(item.data_hora)}</Text>
-                           <Text>Itens:</Text>
+               <Text>Itens:</Text>
               {(() => {
                 let itens = [];
                 if (Array.isArray(item.pedidos)) {
@@ -137,6 +166,8 @@ export default function PedidosRestauranteScreen() {
                   <Text>Nenhum item</Text>
                 );
               })()}
+
+              <Text>Detalhe: {item.detalhe}</Text>
               <Button
                 title={item.pag === "pago" ? "Pago" : "Marcar como Pago"}
                 onPress={() => handleChangeStatus(item.id_pedido)}

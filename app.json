@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Acarajé da Mari",
-    "slug": "acaraje-da-mari",
-    "version": "1.0.0",
+    "name": "Sales Manager",
+    "slug": "sales-manager",
+    "version": "1.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/Logo.png",
+      "image": "./assets/novaLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "notifications": {
-      "icon": "./assets/notification-icon.png",
+      "icon": "./assets/novaLogo.png",
       "color": "#ffffff"
     },
     "ios": {
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/Logo.png",
+        "foregroundImage": "./assets/novaLogo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,

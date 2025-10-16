@@ -15,7 +15,7 @@ export default function CarrinhoDetalhe() {
   const { carrinho, handleAdd, handleRemove, produtos } = useCarrinho();
   const navigation = useNavigation();
 
-  // Adicione esta verificação logo após os hooks
+  
   if (!produtos || produtos.length === 0) {
     return (
       <View style={styles.vazio}>
