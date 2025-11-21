@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, TextInput } from 'react-native';
 import { io } from 'socket.io-client';
+import { useAuth } from '../context/AuthContext'
 
 export default function PedidosAcarajeScreen() {
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -15,18 +18,37 @@ export default function PedidosAcarajeScreen() {
   //const API_URL = "http://localhost:8080";
 
   useEffect(() => {
+     if (!token || !isAuthenticated) {
+      console.log("⏳ Aguardando autenticação antes de carregar pedidos...");
+      return;
+    }
     const socket = io(API_URL);
 
-    socket.on("novoPedido_acaraje", (pedido) => {
+    socket.on("novoPedido_geral", (pedido) => {
       setPedidos(prev => {
         const jaExiste = prev.some(p => p.id_pedido === pedido.id_pedido);
         return jaExiste ? prev : [pedido, ...prev];
       });
     });
 
+    socket.on("statusAtualizado", ({ id, novoStatus }) => {
+      setPedidos(prev =>
+        prev.map(p => 
+          p.id_pedido === Number(id) ? { ...p, pag: novoStatus } : p
+        )
+      );
+    });
+    
+
     const fetchPedidos = async () => {
       try {
-        const res = await fetch(`${API_URL}/pedidosAcaraje`);
+        const res = await fetch(`${API_URL}/pedidosAcaraje`, {
+         headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
         const data = await res.json();
         setPedidos(Array.isArray(data) ? data : []);
@@ -36,12 +58,10 @@ export default function PedidosAcarajeScreen() {
         setLoading(false);
       }
     };
-    fetchPedidos();
+      fetchPedidos();
+    return () => socket.disconnect();
+  }, [token, isAuthenticated]); // 🔥 agora depende do token
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
  async function handleChangeStatus(id: number) {
     try {
@@ -79,11 +99,19 @@ export default function PedidosAcarajeScreen() {
   };
 
   const pedidosFiltrados = pedidos.filter(pedido => {
-    if (!filtroData) return true;
-    if (!pedido.data_hora) return false;
-    const pedidoData = new Date(pedido.data_hora).toISOString().slice(0, 10);
-    return pedidoData === filtroData;
-  });
+  if (!filtroData) return true;
+  if (!pedido.data_hora) return false;
+
+  const dataPedido = new Date(pedido.data_hora);
+  const ano = dataPedido.getFullYear();
+  const mes = String(dataPedido.getMonth() + 1).padStart(2, "0");
+  const dia = String(dataPedido.getDate()).padStart(2, "0");
+
+  const dataFormatada = `${ano}-${mes}-${dia}`; // YYYY-MM-DD local
+  return dataFormatada === filtroData;
+});
+
+
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />;
   if (erro) return <Text style={{ color: "red", padding: 16 }}>{erro}</Text>;
@@ -115,12 +143,31 @@ export default function PedidosAcarajeScreen() {
             >
               <Text>id: {item.id_pedido}</Text>
               <Text>Cliente: {item.nome_cliente}</Text>
+              <Text>Casa: {item.casa}</Text>
               <Text>Total: R$ {item.total}</Text>
               <Text>Data: {formatarData(item.data_hora)}</Text>
-              <Text>Itens:</Text>
-              {item.pedidos.map((it, idx) => (
-                <Text key={idx}>- {it.nome} ({it.quantidade})</Text>
-              ))}
+               <Text>Itens:</Text>
+              {(() => {
+                let itens = [];
+                if (Array.isArray(item.pedidos)) {
+                  itens = item.pedidos;
+                } else if (typeof item.pedidos === "string" && item.pedidos.trim()) {
+                  try {
+                    itens = JSON.parse(item.pedidos);
+                  } catch {
+                    itens = [];
+                  }
+                }
+                return itens.length > 0 ? (
+                  itens.map((it, idx) => (
+                    <Text key={idx}>- {it.nome} ({it.quantidade})</Text>
+                  ))
+                ) : (
+                  <Text>Nenhum item</Text>
+                );
+              })()}
+
+              <Text>Detalhe: {item.detalhe}</Text>
               <Button
                 title={item.pag === "pago" ? "Pago" : "Marcar como Pago"}
                 onPress={() => handleChangeStatus(item.id_pedido)}

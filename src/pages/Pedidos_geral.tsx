@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, TextInput } from 'react-native';
 import { io } from 'socket.io-client';
+import { useAuth } from '../context/AuthContext'
 
 export default function PedidosAcarajeScreen() {
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -15,6 +18,10 @@ export default function PedidosAcarajeScreen() {
   //const API_URL = "http://localhost:8080";
 
   useEffect(() => {
+     if (!token || !isAuthenticated) {
+      console.log("⏳ Aguardando autenticação antes de carregar pedidos...");
+      return;
+    }
     const socket = io(API_URL);
 
     socket.on("novoPedido_geral", (pedido) => {
@@ -35,7 +42,13 @@ export default function PedidosAcarajeScreen() {
 
     const fetchPedidos = async () => {
       try {
-        const res = await fetch(`${API_URL}/pedidosGeral`);
+        const res = await fetch(`${API_URL}/pedidosGeral`, {
+         headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
         const data = await res.json();
         setPedidos(Array.isArray(data) ? data : []);
@@ -45,12 +58,10 @@ export default function PedidosAcarajeScreen() {
         setLoading(false);
       }
     };
-    fetchPedidos();
+      fetchPedidos();
+    return () => socket.disconnect();
+  }, [token, isAuthenticated]); // 🔥 agora depende do token
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
  async function handleChangeStatus(id: number) {
     try {
@@ -88,11 +99,19 @@ export default function PedidosAcarajeScreen() {
   };
 
   const pedidosFiltrados = pedidos.filter(pedido => {
-    if (!filtroData) return true;
-    if (!pedido.data_hora) return false;
-    const pedidoData = new Date(pedido.data_hora).toISOString().slice(0, 10);
-    return pedidoData === filtroData;
-  });
+  if (!filtroData) return true;
+  if (!pedido.data_hora) return false;
+
+  const dataPedido = new Date(pedido.data_hora);
+  const ano = dataPedido.getFullYear();
+  const mes = String(dataPedido.getMonth() + 1).padStart(2, "0");
+  const dia = String(dataPedido.getDate()).padStart(2, "0");
+
+  const dataFormatada = `${ano}-${mes}-${dia}`; // YYYY-MM-DD local
+  return dataFormatada === filtroData;
+});
+
+
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />;
   if (erro) return <Text style={{ color: "red", padding: 16 }}>{erro}</Text>;

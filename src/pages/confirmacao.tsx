@@ -3,15 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert } 
 import { Picker } from '@react-native-picker/picker';
 import { useCarrinho } from '../context/CarrinhoContext';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 
 export default function Confirmacao() {
   const navigation = useNavigation();
-  const { carrinho, produtos, handleClear } = useCarrinho();
+  const { carrinho, produtos, handleClear, handleClearCarrinho } = useCarrinho();
+  const { user } = useAuth();
   const [cliente, setCliente] = useState('');
   const [funcionario, setFuncionario] = useState('');
   const [casa, setCasa] = useState('');
   const [obs, setObs] = useState('')
-  const [funcionarios, setFuncionarios] = useState([]);
+  const [funcionarios, setFuncionarios] = useState<any[]>([])
   const [enviado, setEnviado] = useState(false);
 
   const API_URL =  'https://gerenciadordepedidos.onrender.com';
@@ -54,34 +56,45 @@ export default function Confirmacao() {
   useEffect(() => {
     fetch(`${API_URL}/funcionarios`)
       .then(res => res.json())
-      .then(data => setFuncionarios(data))
+      .then(data => setFuncionarios(Array.isArray(data) ? data : []))
       .catch(err => console.error('Erro ao carregar funcionários:', err));
   }, []);
 
   const handleConfirmarPedido = async () => {
-    if (!cliente || !funcionario || !casa || itensParaBackend.length === 0) {
+    if (!cliente || !casa || itensParaBackend.length === 0) {
       Alert.alert('Erro', 'Preencha todos os campos e adicione pelo menos um produto.');
       return;
     }
 
+    console.log('id do restaurante: ',user?.dados?.restaurante?.id_restaurante)
     try {
       const pedido = {
         cliente,
-        funcionario,
+        funcionario: user?.id ?? '',
         casa,
         itens: itensParaBackend,
+        restauranteid: Number(user?.dados?.restaurante?.id_restaurante) ?? "",
         obs,
         total
       };
 
-      await fetch(`${API_URL}/pedidosGeral`, {
+      const res = await fetch(`${API_URL}/pedidosGeral`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pedido)
       });
 
-      handleClear(); // limpa o carrinho
+      console.log('Status do pedido:', res.status);
+      const resData = await res.json().catch(() => null);
+      console.log('Resposta do backend:', resData);
+
+      if (!res.ok) {
+        Alert.alert('Erro', 'O pedido não foi salvo no banco.');
+        return;
+      }
+      
       setEnviado(true);
+      handleClearCarrinho();
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Não foi possível enviar o pedido');
@@ -92,7 +105,7 @@ export default function Confirmacao() {
     return (
       <View style={styles.container}>
         <Text style={styles.sucesso}>🎉 Pedido enviado com sucesso!</Text>
-        <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('Funcionario')}>
           <Text style={styles.botaoTexto}>Voltar ao início</Text>
         </TouchableOpacity>
       </View>
@@ -111,7 +124,7 @@ export default function Confirmacao() {
         placeholder="Digite seu nome"
       />
 
-      <Text>🧑‍🍳 Funcionário:</Text>
+      {/* <Text>🧑‍🍳 Funcionário:</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={funcionario}
@@ -126,7 +139,7 @@ export default function Confirmacao() {
             />
           ))}
         </Picker>
-      </View>
+      </View> */}
 
       <Text>🏠 Número da casa:</Text>
       <TextInput

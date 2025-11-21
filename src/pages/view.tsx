@@ -34,7 +34,7 @@ export default function Home() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 Acarajé da Mari</Text>
+        <Text style={styles.footerText}>© 2025 Sales Manager</Text>
       </View>
     </View>
   );
