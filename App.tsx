@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Alert, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import io from "socket.io-client";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
@@ -60,7 +62,7 @@ export default function App() {
 
     socketRef.current.on("novoPedido_geral", (pedido: any) => {
       console.log("🔔 Novo pedido recebido:", pedido);
-      
+
       // Mostrar notificação local
       Notifications.scheduleNotificationAsync({
         content: {
@@ -73,14 +75,14 @@ export default function App() {
 
       // Também mostrar alert
       Alert.alert(
-        "Novo Pedido Geral!", 
+        "Novo Pedido Geral!",
         `Cliente: ${pedido.nome_cliente || 'N/A'}\nTotal: R$ ${pedido.total || '0,00'}`
       );
     });
 
     socketRef.current.on("novoPedido_acaraje", (pedido: any) => {
       console.log("🥘 Novo pedido acarajé:", pedido);
-      
+
       Notifications.scheduleNotificationAsync({
         content: {
           title: "🥘 Novo Pedido Acarajé!",
@@ -93,7 +95,7 @@ export default function App() {
 
     socketRef.current.on("novoPedido_restaurante", (pedido: any) => {
       console.log("🍽️ Novo pedido restaurante:", pedido);
-      
+
       Notifications.scheduleNotificationAsync({
         content: {
           title: "🍽️ Novo Pedido Restaurante!",
@@ -123,58 +125,56 @@ export default function App() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 2 }}>
       <AuthProvider>
         <CarrinhoProvider>
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
-              <Stack.Screen 
-                name="Login" 
-                component={Login}
-                options={{ title: "Login" }}
-              />
-              <Stack.Screen 
-                name="Home" 
-                component={Home}
-                options={{ title: "Sales Manager" }}
-              />
-               <Stack.Screen name="Admin" 
-               component={Admin} />
-              <Stack.Screen 
-                name="Produtos" 
-                component={ListaProdutos}
-              />
-              <Stack.Screen 
-                name="Carrinho" 
-                component={CarrinhoDetalhe}
-                options={{ title: "Carrinho" }}
-              />
-              <Stack.Screen 
-                name="Funcionario" 
-                component={Funcionario}
-              />
-              <Stack.Screen 
-                name="Confirmacao" 
-                component={Confirmacao}
-                options={{ title: "Confirmação" }}
-              />
-              <Stack.Screen 
-                name="PedidosAcaraje" 
-                component={PedidosAcarajeScreen}
-                options={{ title: "Pedidos Acarajé" }}
-              />
-              <Stack.Screen 
-                name="PedidosGeral" 
-                component={PedidosGeral}
-              />
-              <Stack.Screen 
-                name="PedidosRestaurante" 
-                component={PedidosRestaurante}
-                options={{ title: "Pedidos Restaurante" }}
-              />
-              <Stack.Screen name="View" component={View} />
-            </Stack.Navigator>
-          </NavigationContainer>
+          <SafeAreaView style={{ flex: 1 }}>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName="Login"
+                screenOptions={{ headerShown: false }}>
+
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                />
+                <Stack.Screen
+                  name="Home"
+                  component={Home}
+                />
+                <Stack.Screen name="Admin"
+                  component={Admin} />
+                <Stack.Screen
+                  name="Produtos"
+                  component={ListaProdutos}
+                />
+                <Stack.Screen
+                  name="Carrinho"
+                  component={CarrinhoDetalhe}
+                />
+                <Stack.Screen
+                  name="Funcionario"
+                  component={Funcionario}
+                />
+                <Stack.Screen
+                  name="Confirmacao"
+                  component={Confirmacao}
+                />
+                <Stack.Screen
+                  name="PedidosAcaraje"
+                  component={PedidosAcarajeScreen}
+                />
+                <Stack.Screen
+                  name="PedidosGeral"
+                  component={PedidosGeral}
+                />
+                <Stack.Screen
+                  name="PedidosRestaurante"
+                  component={PedidosRestaurante}
+                />
+                <Stack.Screen name="View" component={View} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </SafeAreaView>
         </CarrinhoProvider>
       </AuthProvider>
     </GestureHandlerRootView>
@@ -184,26 +184,26 @@ export default function App() {
 // Função para registrar token de push
 async function registerForPushNotificationsAsync() {
   let token;
-  
+
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus !== "granted") {
       Alert.alert("Erro", "Falha ao obter permissão para notificações!");
       return;
     }
-    
+
     try {
       token = (await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig?.extra?.eas?.projectId,
       })).data;
-      
+
       console.log("Expo Push Token:", token);
 
       // Enviar token para o backend

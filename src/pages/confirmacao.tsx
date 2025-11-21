@@ -11,14 +11,11 @@ export default function Confirmacao() {
   const { carrinho, produtos, handleClear, handleClearCarrinho } = useCarrinho();
   const { user } = useAuth();
   const [cliente, setCliente] = useState('');
-  const [funcionario, setFuncionario] = useState('');
   const [casa, setCasa] = useState('');
   const [obs, setObs] = useState('')
   const [funcionarios, setFuncionarios] = useState<any[]>([])
   const [enviado, setEnviado] = useState(false);
-  const [totalWp, setTotalWp] = useState('null')
-  const [funcionarioWp, setFuncionarioWp] = useState('null')
-
+ 
 
   const API_URL = 'https://gerenciadordepedidos.onrender.com';
   //const API_URL =  'http://localhost:8080';
@@ -57,12 +54,6 @@ export default function Confirmacao() {
 
 
   const total = itensParaBackend.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
-  const usuario = user?.id ?? '';
-
-
-  useEffect(() => {
-    setFuncionarioWp(usuario);
-  }, [usuario])
 
   const enviarWhatsApp = () => {
     const detalhes = `*Novo Pedido*
